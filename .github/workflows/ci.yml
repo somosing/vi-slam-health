@@ -1,0 +1,42 @@
+name: ROS 2 Jazzy CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base-noble
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools and dependencies
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends build-essential cmake python3-colcon-common-extensions python3-pip python3-pytest python3-rosdep python3-venv
+          rosdep update
+          rosdep install --from-paths src --ignore-src -r -y --rosdistro jazzy
+      - name: Build
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - name: Test ROS packages
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          colcon test --event-handlers console_direct+
+          colcon test-result --verbose
+      - name: Test evaluation package
+        shell: bash
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -e 'evaluation[test]'
+          .venv/bin/pytest evaluation/tests
+      - name: Test benchmark acceptance logic
+        shell: bash
+        run: |
+          python3 -m unittest discover -s tools/benchmark/tests -v

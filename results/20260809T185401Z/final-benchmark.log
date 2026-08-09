@@ -1,0 +1,33 @@
+
+=== Running clean ===
+[INFO] [1786301642.764787301] [vif_benchmark_observer_26566]: [clean] state=INITIALIZING score=0.035 pose_valid=False
+[INFO] [1786301647.291513921] [vif_benchmark_observer_26566]: [clean] observed map_id=0
+[INFO] [1786301647.604665975] [vif_benchmark_observer_26566]: [clean] state=HEALTHY score=0.863 pose_valid=True
+clean: PASS — no errors
+
+=== Running visual_occlusion ===
+[INFO] [1786301660.626455744] [vif_benchmark_observer_26566]: [visual_occlusion] state=INITIALIZING score=0.000 pose_valid=False
+[INFO] [1786301665.314941944] [vif_benchmark_observer_26566]: [visual_occlusion] observed map_id=0
+[INFO] [1786301665.526884882] [vif_benchmark_observer_26566]: [visual_occlusion] state=HEALTHY score=0.881 pose_valid=True
+[INFO] [1786301706.226836627] [vif_benchmark_observer_26566]: [visual_occlusion] state=RELOCALIZING score=0.850 pose_valid=False
+[INFO] [1786301706.259741308] [vif_benchmark_observer_26566]: [visual_occlusion] fault=visual_occlusion event=STARTED
+[INFO] [1786301707.231136885] [vif_benchmark_observer_26566]: [visual_occlusion] fault=visual_occlusion event=ENDED
+[INFO] [1786301707.626649627] [vif_benchmark_observer_26566]: [visual_occlusion] state=RECOVERED score=0.942 pose_valid=True
+[INFO] [1786301708.126399267] [vif_benchmark_observer_26566]: [visual_occlusion] state=HEALTHY score=0.955 pose_valid=True
+visual_occlusion: PASS — no errors
+
+=== Running camera_blackout ===
+[INFO] [1786301711.221483837] [vif_benchmark_observer_26566]: [camera_blackout] state=INITIALIZING score=0.000 pose_valid=False
+[INFO] [1786301715.718542714] [vif_benchmark_observer_26566]: [camera_blackout] observed map_id=0
+[INFO] [1786301716.021772417] [vif_benchmark_observer_26566]: [camera_blackout] state=HEALTHY score=0.910 pose_valid=True
+[INFO] [1786301756.869559966] [vif_benchmark_observer_26566]: [camera_blackout] fault=camera_blackout event=STARTED
+[INFO] [1786301757.372628525] [vif_benchmark_observer_26566]: [camera_blackout] state=LOST score=0.240 pose_valid=False
+[INFO] [1786301757.853940725] [vif_benchmark_observer_26566]: [camera_blackout] fault=camera_blackout event=ENDED
+[INFO] [1786301757.910042797] [vif_benchmark_observer_26566]: [camera_blackout] observed map_id=1
+[INFO] [1786301757.922298001] [vif_benchmark_observer_26566]: [camera_blackout] state=RESETTING score=0.347 pose_valid=False
+[INFO] [1786301757.971917192] [vif_benchmark_observer_26566]: [camera_blackout] state=INITIALIZING score=0.576 pose_valid=False
+[INFO] [1786301758.121967065] [vif_benchmark_observer_26566]: [camera_blackout] state=HEALTHY score=0.883 pose_valid=True
+camera_blackout: PASS — no errors
+
+Report: results/20260809T185401Z/report.md
+Overall: PASS

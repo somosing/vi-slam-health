@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>vif_euroc_player</name>
+  <version>0.3.0</version>
+  <description>Timestamp-faithful EuRoC stereo-inertial publisher for VIF.</description>
+  <maintainer email="mohit.singh@users.noreply.github.com">Mohit Singh</maintainer>
+  <license>GPL-3.0-or-later</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <test_depend>ament_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

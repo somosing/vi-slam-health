@@ -1,0 +1,9 @@
+fault_injector:
+  ros__parameters:
+    enabled: true
+    fault_type: camera_blackout
+    start_after_sec: 8.0
+    duration_sec: 3.0
+    frame_drop_probability: 0.5
+    timestamp_delay_ms: 100.0
+    random_seed: 7

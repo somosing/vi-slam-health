@@ -1,0 +1,37 @@
+name: Bug report
+description: Report a reproducible build, runtime, or metric problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Problem
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the exact command, configuration, and smallest reproducible input.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Repository commit or release
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, ROS distribution, middleware, compiler, architecture, and backend commit.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove credentials, private paths, and sensitive dataset content.

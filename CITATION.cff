@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite this repository and the selected SLAM backend."
+title: "Visual-Inertial SLAM with Failure Detection and Relocalization"
+type: software
+authors:
+  - family-names: Singh
+    given-names: Mohit
+version: 0.3.0
+date-released: 2026-08-09
+license: GPL-3.0-or-later

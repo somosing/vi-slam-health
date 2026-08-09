@@ -1,0 +1,4 @@
+scenario,status,detection_delay_sec,fault_duration_sec,recovery_after_fault_end_sec,healthy_after_fault_end_sec,reset_delay_sec,map_count,map_changed,map_ids,state_sequence,errors
+clean,PASS,,,,,,1,False,0,INITIALIZING -> HEALTHY,
+visual_occlusion,PASS,,0.971353,0.39548,0.895461,,1,False,0,INITIALIZING -> HEALTHY -> RELOCALIZING -> RECOVERED -> HEALTHY,
+camera_blackout,PASS,0.502298,0.983945,,0.267979,1.05201,2,True,0 1,INITIALIZING -> HEALTHY -> LOST -> RESETTING -> INITIALIZING -> HEALTHY,

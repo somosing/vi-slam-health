@@ -1,0 +1,10 @@
+name: camera_blackout_3s
+fault_type: camera_blackout
+start_after_sec: 8.0
+duration_sec: 3.0
+expected:
+  must_observe: [HEALTHY, LOST, RESETTING, INITIALIZING, HEALTHY]
+  must_not_observe: [RECOVERED]
+  require_map_change: true
+  max_detection_delay_sec: 1.0
+  max_recovery_time_sec: 5.0

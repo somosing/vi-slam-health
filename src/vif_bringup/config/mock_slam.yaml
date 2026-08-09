@@ -1,0 +1,8 @@
+mock_slam:
+  ros__parameters:
+    initialization_sec: 2.0
+    relocalization_sec: 1.5
+    trajectory_radius_m: 2.0
+    angular_speed_rad_s: 0.12
+    map_frame: map
+    base_frame: base_link

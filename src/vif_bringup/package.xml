@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>vif_bringup</name>
+  <version>0.3.0</version>
+  <description>Launch and configuration for vi-slam-health.</description>
+  <maintainer email="mohit.singh@users.noreply.github.com">Mohit Singh</maintainer>
+  <license>GPL-3.0-or-later</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>vif_euroc_player</exec_depend>
+  <exec_depend>vif_fault_injection</exec_depend>
+  <exec_depend>vif_health_monitor</exec_depend>
+  <exec_depend>vif_mock_slam</exec_depend>
+  <exec_depend>vif_orbslam3</exec_depend>
+  <exec_depend>vif_relocalization</exec_depend>
+  <exec_depend>vif_sensor_frontend</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

@@ -1,0 +1,23 @@
+health_monitor:
+  ros__parameters:
+    input_timeout_sec: 0.5
+    feature_min: 20.0
+    feature_nominal: 120.0
+    inlier_bad: 0.25
+    inlier_good: 0.70
+    reprojection_good_px: 1.0
+    reprojection_bad_px: 5.0
+    processing_budget_ms: 50.0
+    weight_features: 0.25
+    weight_inliers: 0.25
+    weight_reprojection: 0.15
+    weight_sensors: 0.25
+    weight_realtime: 0.10
+    ewma_alpha: 0.35
+    healthy_threshold: 0.70
+    degraded_threshold: 0.45
+    lost_threshold: 0.25
+    recovery_threshold: 0.65
+    transition_samples: 3
+    recovery_samples: 8
+    recovered_hold_samples: 10

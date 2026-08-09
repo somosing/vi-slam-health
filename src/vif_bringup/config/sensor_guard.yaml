@@ -1,0 +1,9 @@
+sensor_guard:
+  ros__parameters:
+    left_topic: /vif/camera/left/image_raw
+    right_topic: /vif/camera/right/image_raw
+    imu_topic: /vif/imu
+    camera_stale_sec: 0.35
+    imu_stale_sec: 0.10
+    max_imu_gap_sec: 0.025
+    max_stereo_skew_sec: 0.005

@@ -1,0 +1,6 @@
+relocalization_manager:
+  ros__parameters:
+    manage_service: /vif/slam/manage
+    relocalization_timeout_sec: 8.0
+    failure_timeout_sec: 16.0
+    cooldown_sec: 5.0

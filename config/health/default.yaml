@@ -1,0 +1,8 @@
+# Canonical benchmark copy. Runtime copy lives in vif_bringup/config.
+healthy_threshold: 0.70
+degraded_threshold: 0.45
+lost_threshold: 0.25
+recovery_threshold: 0.65
+ewma_alpha: 0.35
+transition_samples: 3
+recovery_samples: 8

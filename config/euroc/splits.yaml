@@ -1,0 +1,3 @@
+development: [MH_01_easy, V1_01_easy, V2_01_easy]
+validation: [MH_03_medium, V1_02_medium, V2_02_medium]
+test: [MH_02_easy, MH_04_difficult, MH_05_difficult, V1_03_difficult, V2_03_difficult]

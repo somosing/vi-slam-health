@@ -1,0 +1,9 @@
+services:
+  vi-slam-health:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+    command: ["ros2", "launch", "vif_bringup", "synthetic_demo.launch.py"]

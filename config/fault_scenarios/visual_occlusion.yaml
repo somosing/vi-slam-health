@@ -1,0 +1,6 @@
+fault_injector:
+  ros__parameters:
+    enabled: true
+    fault_type: visual_occlusion
+    start_after_sec: 45.0
+    duration_sec: 1.0

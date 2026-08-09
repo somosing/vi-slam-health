@@ -1,0 +1,30 @@
+orbslam3:
+  ros__parameters:
+    vocabulary_path: ""
+    settings_path: ""
+    use_viewer: false
+    left_topic: /vif/camera/left/image_raw
+    right_topic: /vif/camera/right/image_raw
+    imu_topic: /vif/imu
+    map_frame: map
+    base_frame: camera_left_optical_frame
+    max_stereo_skew_sec: 0.005
+    imu_wait_timeout_sec: 0.02
+    max_imu_buffer_size: 4000
+    publish_frozen_pose_on_loss: true
+    tracking_covariance: 0.01
+    invalid_covariance: 1000000.0
+
+    # T_map_orb: ORB optical axes (right, down, forward) to REP-103
+    # map axes (forward, left, up), row-major.
+    orb_world_to_map: [0.0, 0.0, 1.0, 0.0,
+                       -1.0, 0.0, 0.0, 0.0,
+                       0.0, -1.0, 0.0, 0.0,
+                       0.0, 0.0, 0.0, 1.0]
+
+    # T_camera_base maps base_frame coordinates into the left-camera optical
+    # frame. Identity is correct only when base_frame is that optical frame.
+    base_to_camera: [1.0, 0.0, 0.0, 0.0,
+                     0.0, 1.0, 0.0, 0.0,
+                     0.0, 0.0, 1.0, 0.0,
+                     0.0, 0.0, 0.0, 1.0]

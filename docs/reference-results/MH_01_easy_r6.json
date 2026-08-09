@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "validation_date": "2026-08-07",
+  "dataset": "EuRoC MH_01_easy",
+  "backend": "ORB-SLAM3 stereo-inertial",
+  "project_version": "0.2.0-r6 manual validation",
+  "automated_by_portfolio_runner": false,
+  "scenarios": [
+    {
+      "scenario": "visual_occlusion",
+      "fault_duration_sec": 0.988567,
+      "detection_delay_sec": 0.059158,
+      "recovery_after_fault_end_sec": 0.421116,
+      "healthy_after_fault_end_sec": 0.920546,
+      "state_sequence": [
+        "INITIALIZING",
+        "HEALTHY",
+        "RELOCALIZING",
+        "RECOVERED",
+        "HEALTHY"
+      ],
+      "map_ids": [0],
+      "result": "PASS"
+    },
+    {
+      "scenario": "camera_blackout",
+      "fault_duration_sec": 0.983007,
+      "detection_delay_sec": 0.538194,
+      "state_sequence": null,
+      "map_ids": [0, 1],
+      "observed_outcome": "timestamp jump; active map changed from 0 to 1",
+      "result": "PASS (manual log-based reset classification)"
+    }
+  ],
+  "limitations": [
+    "This file records the already-completed manual r6 validation, not an r7 automated run.",
+    "The blackout observer output was not captured; its classification comes from ORB-SLAM3 map/timestamp logs.",
+    "Results are single-sequence engineering evidence, not aggregate performance claims."
+  ]
+}

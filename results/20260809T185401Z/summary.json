@@ -1,0 +1,468 @@
+{
+  "all_passed": true,
+  "configuration": {
+    "clean_hold_sec": 10.0,
+    "dataset_path": "<EUROC_SEQUENCE>",
+    "fault_duration_sec": 1.0,
+    "fault_start_sec": 45.0,
+    "playback_duration_sec": 75.0,
+    "playback_rate": 1.0,
+    "scenarios": [
+      "clean",
+      "visual_occlusion",
+      "camera_blackout"
+    ],
+    "settings_path": "<ORB_SLAM3_ROOT>/Examples/Stereo-Inertial/EuRoC.yaml",
+    "vocabulary_path": "<ORB_SLAM3_ROOT>/Vocabulary/ORBvoc.txt"
+  },
+  "environment": {
+    "orbslam3_git_commit": "4452a3c4ab75b1cde34e5505a36ec3f9edcdc4c4",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "project_git_commit": null,
+    "python": "3.12.3",
+    "rmw_implementation": "default",
+    "ros_distro": "jazzy",
+    "ros_domain_id": "42"
+  },
+  "generated_at_utc": "2026-08-09T18:56:00.181250+00:00",
+  "project_version": "0.3.0",
+  "run_id": "20260809T185401Z",
+  "scenarios": [
+    {
+      "commands": {
+        "backend": [
+          "ros2",
+          "launch",
+          "vif_bringup",
+          "orbslam3.launch.py",
+          "vocabulary_path:=<ORB_SLAM3_ROOT>/Vocabulary/ORBvoc.txt",
+          "settings_path:=<ORB_SLAM3_ROOT>/Examples/Stereo-Inertial/EuRoC.yaml",
+          "use_viewer:=false"
+        ],
+        "injector": [
+          "ros2",
+          "run",
+          "vif_fault_injection",
+          "fault_injector",
+          "--ros-args",
+          "-p",
+          "enabled:=false",
+          "-p",
+          "fault_type:=visual_occlusion",
+          "-p",
+          "start_after_sec:=45.0",
+          "-p",
+          "duration_sec:=1.0"
+        ],
+        "player": [
+          "ros2",
+          "run",
+          "vif_euroc_player",
+          "euroc_player",
+          "--ros-args",
+          "-p",
+          "dataset_path:=<EUROC_SEQUENCE>",
+          "-p",
+          "duration_sec:=75.0",
+          "-p",
+          "playback_rate:=1.0",
+          "-p",
+          "left_topic:=/vif/raw/camera/left/image_raw",
+          "-p",
+          "right_topic:=/vif/raw/camera/right/image_raw",
+          "-p",
+          "imu_topic:=/vif/raw/imu",
+          "-p",
+          "required_subscriber_count:=1"
+        ]
+      },
+      "errors": [],
+      "fault_events": [],
+      "map_ids": [
+        0
+      ],
+      "metrics": {
+        "detection_delay_sec": null,
+        "fault_duration_sec": null,
+        "healthy_after_fault_end_sec": null,
+        "map_changed": false,
+        "map_count": 1,
+        "observation_duration_sec": 16.12907,
+        "recovery_after_fault_end_sec": null,
+        "reset_delay_sec": null,
+        "stable_healthy_sec": 10.250076
+      },
+      "passed": true,
+      "relocalization_events": [],
+      "scenario": "clean",
+      "state_sequence": [
+        "INITIALIZING",
+        "HEALTHY"
+      ],
+      "state_transitions": [
+        {
+          "monotonic_sec": 13883.888814195,
+          "pose_valid": false,
+          "reasons": [
+            "low_feature_count",
+            "inlier_ratio_unavailable",
+            "reprojection_error_unavailable",
+            "camera_unavailable",
+            "imu_unavailable",
+            "processing_time_unavailable"
+          ],
+          "ros_stamp_sec": 1786301642.7541068,
+          "score": 0.035,
+          "state": "INITIALIZING"
+        },
+        {
+          "monotonic_sec": 13888.738661244,
+          "pose_valid": true,
+          "reasons": [],
+          "ros_stamp_sec": 1786301647.6041045,
+          "score": 0.862769,
+          "state": "HEALTHY"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "commands": {
+        "backend": [
+          "ros2",
+          "launch",
+          "vif_bringup",
+          "orbslam3.launch.py",
+          "vocabulary_path:=<ORB_SLAM3_ROOT>/Vocabulary/ORBvoc.txt",
+          "settings_path:=<ORB_SLAM3_ROOT>/Examples/Stereo-Inertial/EuRoC.yaml",
+          "use_viewer:=false"
+        ],
+        "injector": [
+          "ros2",
+          "run",
+          "vif_fault_injection",
+          "fault_injector",
+          "--ros-args",
+          "-p",
+          "enabled:=true",
+          "-p",
+          "fault_type:=visual_occlusion",
+          "-p",
+          "start_after_sec:=45.0",
+          "-p",
+          "duration_sec:=1.0"
+        ],
+        "player": [
+          "ros2",
+          "run",
+          "vif_euroc_player",
+          "euroc_player",
+          "--ros-args",
+          "-p",
+          "dataset_path:=<EUROC_SEQUENCE>",
+          "-p",
+          "duration_sec:=75.0",
+          "-p",
+          "playback_rate:=1.0",
+          "-p",
+          "left_topic:=/vif/raw/camera/left/image_raw",
+          "-p",
+          "right_topic:=/vif/raw/camera/right/image_raw",
+          "-p",
+          "imu_topic:=/vif/raw/imu",
+          "-p",
+          "required_subscriber_count:=1"
+        ]
+      },
+      "errors": [],
+      "fault_events": [
+        {
+          "event": "STARTED",
+          "fault_type": "visual_occlusion",
+          "injector_elapsed_sec": 45.103798,
+          "monotonic_sec": 13947.393576553,
+          "ros_stamp_sec": 1786301706.2588491
+        },
+        {
+          "event": "ENDED",
+          "fault_type": "visual_occlusion",
+          "injector_elapsed_sec": 46.075218,
+          "monotonic_sec": 13948.364929429,
+          "ros_stamp_sec": 1786301707.2302732
+        }
+      ],
+      "map_ids": [
+        0
+      ],
+      "metrics": {
+        "detection_delay_sec": null,
+        "fault_duration_sec": 0.971353,
+        "healthy_after_fault_end_sec": 0.895461,
+        "map_changed": false,
+        "map_count": 1,
+        "observation_duration_sec": 48.791043,
+        "recovery_after_fault_end_sec": 0.39548,
+        "reset_delay_sec": null,
+        "stable_healthy_sec": 40.700019
+      },
+      "passed": true,
+      "relocalization_events": [],
+      "scenario": "visual_occlusion",
+      "state_sequence": [
+        "INITIALIZING",
+        "HEALTHY",
+        "RELOCALIZING",
+        "RECOVERED",
+        "HEALTHY"
+      ],
+      "state_transitions": [
+        {
+          "monotonic_sec": 13901.760395605,
+          "pose_valid": false,
+          "reasons": [
+            "low_feature_count",
+            "inlier_ratio_unavailable",
+            "reprojection_error_unavailable",
+            "camera_unavailable",
+            "imu_unavailable",
+            "timestamp_fault",
+            "imu_gap",
+            "processing_time_unavailable"
+          ],
+          "ros_stamp_sec": 1786301660.6257563,
+          "score": 0.0,
+          "state": "INITIALIZING"
+        },
+        {
+          "monotonic_sec": 13906.660517833,
+          "pose_valid": true,
+          "reasons": [],
+          "ros_stamp_sec": 1786301665.5257773,
+          "score": 0.88063,
+          "state": "HEALTHY"
+        },
+        {
+          "monotonic_sec": 13947.360536793,
+          "pose_valid": false,
+          "reasons": [
+            "low_feature_count",
+            "inlier_ratio_unavailable",
+            "reprojection_error_unavailable",
+            "backend_relocalizing"
+          ],
+          "ros_stamp_sec": 1786301706.2257836,
+          "score": 0.850472,
+          "state": "RELOCALIZING"
+        },
+        {
+          "monotonic_sec": 13948.760409727,
+          "pose_valid": true,
+          "reasons": [
+            "processing_overrun"
+          ],
+          "ros_stamp_sec": 1786301707.6257603,
+          "score": 0.94248,
+          "state": "RECOVERED"
+        },
+        {
+          "monotonic_sec": 13949.260390857,
+          "pose_valid": true,
+          "reasons": [],
+          "ros_stamp_sec": 1786301708.1257572,
+          "score": 0.954624,
+          "state": "HEALTHY"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "commands": {
+        "backend": [
+          "ros2",
+          "launch",
+          "vif_bringup",
+          "orbslam3.launch.py",
+          "vocabulary_path:=<ORB_SLAM3_ROOT>/Vocabulary/ORBvoc.txt",
+          "settings_path:=<ORB_SLAM3_ROOT>/Examples/Stereo-Inertial/EuRoC.yaml",
+          "use_viewer:=false"
+        ],
+        "injector": [
+          "ros2",
+          "run",
+          "vif_fault_injection",
+          "fault_injector",
+          "--ros-args",
+          "-p",
+          "enabled:=true",
+          "-p",
+          "fault_type:=camera_blackout",
+          "-p",
+          "start_after_sec:=45.0",
+          "-p",
+          "duration_sec:=1.0"
+        ],
+        "player": [
+          "ros2",
+          "run",
+          "vif_euroc_player",
+          "euroc_player",
+          "--ros-args",
+          "-p",
+          "dataset_path:=<EUROC_SEQUENCE>",
+          "-p",
+          "duration_sec:=75.0",
+          "-p",
+          "playback_rate:=1.0",
+          "-p",
+          "left_topic:=/vif/raw/camera/left/image_raw",
+          "-p",
+          "right_topic:=/vif/raw/camera/right/image_raw",
+          "-p",
+          "imu_topic:=/vif/raw/imu",
+          "-p",
+          "required_subscriber_count:=1"
+        ]
+      },
+      "errors": [],
+      "fault_events": [
+        {
+          "event": "STARTED",
+          "fault_type": "camera_blackout",
+          "injector_elapsed_sec": 45.053616,
+          "monotonic_sec": 13998.003549058,
+          "ros_stamp_sec": 1786301756.8689227
+        },
+        {
+          "event": "ENDED",
+          "fault_type": "camera_blackout",
+          "injector_elapsed_sec": 46.037327,
+          "monotonic_sec": 13998.987493993,
+          "ros_stamp_sec": 1786301757.8526225
+        }
+      ],
+      "map_ids": [
+        0,
+        1
+      ],
+      "metrics": {
+        "detection_delay_sec": 0.502298,
+        "fault_duration_sec": 0.983945,
+        "healthy_after_fault_end_sec": 0.267979,
+        "map_changed": true,
+        "map_count": 2,
+        "observation_duration_sec": 48.167825,
+        "recovery_after_fault_end_sec": null,
+        "reset_delay_sec": 1.05201,
+        "stable_healthy_sec": 41.350418
+      },
+      "passed": true,
+      "relocalization_events": [
+        {
+          "attempt_id": 1,
+          "detail": "health monitor reported tracking loss",
+          "elapsed_sec": 4e-06,
+          "event": "REQUESTED",
+          "health_score": 0.240253,
+          "monotonic_sec": 13998.507964823
+        },
+        {
+          "attempt_id": 1,
+          "detail": "camera outage requires active-map reset",
+          "elapsed_sec": 0.098614,
+          "event": "RESET_REQUESTED",
+          "health_score": 0.173664,
+          "monotonic_sec": 13998.604544882
+        },
+        {
+          "attempt_id": 1,
+          "detail": "camera outage required active-map reset",
+          "elapsed_sec": 0.549909,
+          "event": "FAILED",
+          "health_score": 0.347101,
+          "monotonic_sec": 13999.057338324
+        }
+      ],
+      "scenario": "camera_blackout",
+      "state_sequence": [
+        "INITIALIZING",
+        "HEALTHY",
+        "LOST",
+        "RESETTING",
+        "INITIALIZING",
+        "HEALTHY"
+      ],
+      "state_transitions": [
+        {
+          "monotonic_sec": 13952.355431586,
+          "pose_valid": false,
+          "reasons": [
+            "low_feature_count",
+            "inlier_ratio_unavailable",
+            "reprojection_error_unavailable",
+            "camera_unavailable",
+            "imu_unavailable",
+            "timestamp_fault",
+            "imu_gap",
+            "processing_time_unavailable"
+          ],
+          "ros_stamp_sec": 1786301711.2208023,
+          "score": 0.0,
+          "state": "INITIALIZING"
+        },
+        {
+          "monotonic_sec": 13957.15542947,
+          "pose_valid": true,
+          "reasons": [],
+          "ros_stamp_sec": 1786301716.0207655,
+          "score": 0.910138,
+          "state": "HEALTHY"
+        },
+        {
+          "monotonic_sec": 13998.505847531,
+          "pose_valid": false,
+          "reasons": [
+            "low_feature_count",
+            "inlier_ratio_unavailable",
+            "reprojection_error_unavailable",
+            "camera_unavailable",
+            "processing_time_unavailable",
+            "backend_tracking_lost"
+          ],
+          "ros_stamp_sec": 1786301757.3708,
+          "score": 0.240253,
+          "state": "LOST"
+        },
+        {
+          "monotonic_sec": 13999.055559427,
+          "pose_valid": false,
+          "reasons": [
+            "reprojection_error_unavailable",
+            "processing_overrun",
+            "backend_map_changed"
+          ],
+          "ros_stamp_sec": 1786301757.9208052,
+          "score": 0.347101,
+          "state": "RESETTING"
+        },
+        {
+          "monotonic_sec": 13999.10542298,
+          "pose_valid": false,
+          "reasons": [],
+          "ros_stamp_sec": 1786301757.970728,
+          "score": 0.575615,
+          "state": "INITIALIZING"
+        },
+        {
+          "monotonic_sec": 13999.255473185,
+          "pose_valid": true,
+          "reasons": [],
+          "ros_stamp_sec": 1786301758.1207461,
+          "score": 0.883453,
+          "state": "HEALTHY"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1
+}

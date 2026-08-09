@@ -1,0 +1,168 @@
+From 27ca6212e5a400c1513bb8b84f50f56befbec674 Mon Sep 17 00:00:00 2001
+From: Mohit Singh <mohit.singh@users.noreply.github.com>
+Date: Fri, 7 Aug 2026 12:00:00 +0200
+Subject: [PATCH] Expose per-frame tracking diagnostics
+
+---
+ include/System.h   | 10 ++++++++++
+ include/Tracking.h |  1 +
+ src/System.cc      | 25 ++++++++++++++++++++++++-
+ src/Tracking.cc    | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 77 insertions(+), 1 deletion(-)
+
+diff --git a/include/System.h b/include/System.h
+index 872c86e..79cd0da 100644
+--- a/include/System.h
++++ b/include/System.h
+@@ -80,6 +80,14 @@ class LocalMapping;
+ class LoopClosing;
+ class Settings;
+
++struct TrackingDiagnostics
++{
++    int matched_correspondences = 0;
++    int pose_inliers = 0;
++    float mean_reprojection_error_px = -1.0f;
++    unsigned long active_map_id = 0;
++};
++
+ class System
+ {
+ public:
+@@ -176,6 +184,7 @@ public:
+     int GetTrackingState();
+     std::vector<MapPoint*> GetTrackedMapPoints();
+     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
++    TrackingDiagnostics GetTrackingDiagnostics();
+
+     // For debugging
+     double GetTimeFromIMUInit();
+@@ -253,6 +262,7 @@ private:
+     int mTrackingState;
+     std::vector<MapPoint*> mTrackedMapPoints;
+     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
++    TrackingDiagnostics mTrackingDiagnostics;
+     std::mutex mMutexState;
+
+     //
+diff --git a/include/Tracking.h b/include/Tracking.h
+index 863c98e..71d5102 100644
+--- a/include/Tracking.h
++++ b/include/Tracking.h
+@@ -101,6 +101,7 @@ public:
+     void NewDataset();
+     int GetNumberDataset();
+     int GetMatchesInliers();
++    float GetMeanReprojectionError();
+
+     //DEBUG
+     void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, string strFolder="");
+diff --git a/src/System.cc b/src/System.cc
+index 60d9c51..e97f82a 100644
+--- a/src/System.cc
++++ b/src/System.cc
+@@ -321,6 +321,24 @@ Sophus::SE3f System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight,
+     mTrackingState = mpTracker->mState;
+     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
+     mTrackedKeyPointsUn = mpTracker->mCurrentFrame.mvKeysUn;
++    mTrackingDiagnostics = TrackingDiagnostics();
++    for(MapPoint* map_point : mTrackedMapPoints)
++    {
++        if(map_point)
++            ++mTrackingDiagnostics.matched_correspondences;
++    }
++    mTrackingDiagnostics.pose_inliers = mpTracker->GetMatchesInliers();
++    if(mTrackingDiagnostics.matched_correspondences <
++       mTrackingDiagnostics.pose_inliers)
++    {
++        mTrackingDiagnostics.matched_correspondences =
++            mTrackingDiagnostics.pose_inliers;
++    }
++    mTrackingDiagnostics.mean_reprojection_error_px =
++        mpTracker->GetMeanReprojectionError();
++    Map* active_map = mpAtlas->GetCurrentMap();
++    if(active_map)
++        mTrackingDiagnostics.active_map_id = active_map->GetId();
+
+     return Tcw;
+ }
+@@ -1336,6 +1354,12 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
+     return mTrackedKeyPointsUn;
+ }
+
++TrackingDiagnostics System::GetTrackingDiagnostics()
++{
++    unique_lock<mutex> lock(mMutexState);
++    return mTrackingDiagnostics;
++}
++
+ double System::GetTimeFromIMUInit()
+ {
+     double aux = mpLocalMapper->GetCurrKFTime()-mpLocalMapper->mFirstTs;
+@@ -1546,4 +1570,3 @@ string System::CalculateCheckSum(string filename, int type)
+ }
+
+ } //namespace ORB_SLAM
+-
+diff --git a/src/Tracking.cc b/src/Tracking.cc
+index 5191451..587415a 100644
+--- a/src/Tracking.cc
++++ b/src/Tracking.cc
+@@ -29,6 +29,8 @@
+ #include "MLPnPsolver.h"
+ #include "GeometricTools.h"
+
++#include <algorithm>
++#include <cmath>
+ #include <iostream>
+
+ #include <mutex>
+@@ -4065,6 +4067,46 @@ int Tracking::GetMatchesInliers()
+     return mnMatchesInliers;
+ }
+
++float Tracking::GetMeanReprojectionError()
++{
++    if(!mCurrentFrame.HasPose() || !mCurrentFrame.mpCamera)
++        return -1.0f;
++
++    const size_t count = std::min(
++        mCurrentFrame.mvpMapPoints.size(),
++        std::min(mCurrentFrame.mvbOutlier.size(), mCurrentFrame.mvKeysUn.size()));
++    if(count == 0)
++        return -1.0f;
++
++    const Sophus::SE3f camera_from_world = mCurrentFrame.GetPose();
++    double residual_sum = 0.0;
++    size_t accepted = 0;
++    for(size_t index = 0; index < count; ++index)
++    {
++        MapPoint* map_point = mCurrentFrame.mvpMapPoints[index];
++        if(!map_point || mCurrentFrame.mvbOutlier[index])
++            continue;
++
++        const Eigen::Vector3f camera_point =
++            camera_from_world * map_point->GetWorldPos();
++        if(!camera_point.allFinite() || camera_point.z() <= 0.0f)
++            continue;
++        const Eigen::Vector2f projected = mCurrentFrame.mpCamera->project(camera_point);
++        const cv::Point2f & observed = mCurrentFrame.mvKeysUn[index].pt;
++        if(!projected.allFinite() || !std::isfinite(observed.x) ||
++           !std::isfinite(observed.y))
++        {
++            continue;
++        }
++        const double delta_x = static_cast<double>(projected.x()) - observed.x;
++        const double delta_y = static_cast<double>(projected.y()) - observed.y;
++        residual_sum += std::sqrt(delta_x * delta_x + delta_y * delta_y);
++        ++accepted;
++    }
++
++    return accepted > 0 ? static_cast<float>(residual_sum / accepted) : -1.0f;
++}
++
+ void Tracking::SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf, string strFolder)
+ {
+     mpSystem->SaveTrajectoryEuRoC(strFolder + strNameFile_frames);
+--
+2.51.1
