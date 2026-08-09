@@ -10,7 +10,7 @@ jobs:
     container: ros:jazzy-ros-base-noble
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install build tools and dependencies
         shell: bash
         run: |
