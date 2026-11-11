@@ -19,7 +19,7 @@ build = "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithD
 build-orbslam3-adapter = "colcon build --symlink-install --packages-up-to vif_orbslam3 --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DVIF_BUILD_ORB_SLAM3_ADAPTER=ON -DVIF_ORB_SLAM3_HAS_DIAGNOSTICS=ON -DORB_SLAM3_ROOT=$ORB_SLAM3_ROOT"
 clean = "rm -rf build install log"
 view-world = "python -m mujoco.viewer --mjcf=simulation/mujoco/worlds/long_indoor_world.xml"
-mujoco-amr = "ros2 launch vif_bringup mujoco_sim.launch.py"
+mujoco-amr = "bash -c 'source install/setup.bash && ros2 launch vif_bringup mujoco_sim.launch.py'"
 
 [dev]
 ros-jazzy-mujoco-vendor = { path = "src/third_party/mujoco_vendor" }
