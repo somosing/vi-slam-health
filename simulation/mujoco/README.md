@@ -2,7 +2,11 @@
 
 The MuJoCo scene is a connected, single-floor 60 m × 18 m indoor map for long-range visual navigation. It contains a central corridor, side bays and doorways, furniture, columns, and varied visual landmarks. The floorplan is long and connected; it is not a multi-storey building.
 
-The scene now includes a differential-drive AMR with independently actuated left and right wheels, wheel position/velocity feedback for encoder odometry, a forward-facing RGB-D camera, and an IMU. Lidar is intentionally omitted.
+The scene now includes a differential-drive AMR with independently actuated left and right wheels, wheel position/velocity feedback for encoder odometry, a forward-facing RGB-D camera, and an IMU. Lidar is intentionally omitted from the robot and the scene. The pinned upstream
+camera/control plugin source also carries its optional 3-D lidar extension as a
+build dependency; Pixi builds that extension from the same pinned source to avoid
+mixing incompatible released MuJoCo binaries. No lidar plugin is configured or
+activated in this simulation.
 
 ## Pixi workflow
 
