@@ -101,7 +101,7 @@ bool ImuValuesFinite(const sensor_msgs::msg::Imu & msg)
 class OrbSlam3Node final : public rclcpp::Node {
 public:
   using Image = sensor_msgs::msg::Image;
-  using StereoPolicy = message_filters::sync_policies::ApproximateTime<Image, Image>;
+  using ImagePairPolicy = message_filters::sync_policies::ApproximateTime<Image, Image>;
   using TrackingStatus = vif_interfaces::msg::TrackingStatus;
   using ManageSlam = vif_interfaces::srv::ManageSlam;
 
@@ -112,10 +112,15 @@ public:
       declare_parameter<std::string>("vocabulary_path", "");
     const std::string settings_path = declare_parameter<std::string>("settings_path", "");
     const bool use_viewer = declare_parameter<bool>("use_viewer", false);
+    sensor_mode_ = declare_parameter<std::string>("sensor_mode", "stereo_imu");
     const auto left_topic = declare_parameter<std::string>(
       "left_topic", "/vif/camera/left/image_raw");
     const auto right_topic = declare_parameter<std::string>(
       "right_topic", "/vif/camera/right/image_raw");
+    const auto rgb_topic = declare_parameter<std::string>(
+      "rgb_topic", "/vif/camera/color/image_raw");
+    const auto depth_topic = declare_parameter<std::string>(
+      "depth_topic", "/vif/camera/depth/image_raw");
     const auto imu_topic = declare_parameter<std::string>("imu_topic", "/vif/imu");
     map_frame_ = declare_parameter<std::string>("map_frame", "map");
     base_frame_ = declare_parameter<std::string>(
@@ -148,6 +153,9 @@ public:
       declare_parameter<std::vector<double>>("base_to_camera", identity),
       "base_to_camera");
 
+    if (sensor_mode_ != "stereo_imu" && sensor_mode_ != "rgbd_imu") {
+      throw std::invalid_argument("sensor_mode must be stereo_imu or rgbd_imu");
+    }
     if (!std::filesystem::is_regular_file(vocabulary_path)) {
       throw std::invalid_argument("vocabulary_path is not a readable file: " + vocabulary_path);
     }
@@ -161,8 +169,10 @@ public:
       throw std::invalid_argument("invalid synchronization or covariance parameters");
     }
 
+    const auto sensor = sensor_mode_ == "rgbd_imu" ?
+      ORB_SLAM3::System::IMU_RGBD : ORB_SLAM3::System::IMU_STEREO;
     system_ = std::make_unique<ORB_SLAM3::System>(
-      vocabulary_path, settings_path, ORB_SLAM3::System::IMU_STEREO, use_viewer);
+      vocabulary_path, settings_path, sensor, use_viewer);
 
     tracking_pub_ = create_publisher<TrackingStatus>(
       "/vif/slam/tracking", rclcpp::QoS(10).reliable());
@@ -174,14 +184,16 @@ public:
         std::placeholders::_2));
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
-    left_sub_.subscribe(this, left_topic, rmw_qos_profile_sensor_data);
-    right_sub_.subscribe(this, right_topic, rmw_qos_profile_sensor_data);
-    stereo_sync_ = std::make_shared<message_filters::Synchronizer<StereoPolicy>>(
-      StereoPolicy(20), left_sub_, right_sub_);
-    stereo_sync_->setMaxIntervalDuration(
+    const auto first_image_topic = sensor_mode_ == "rgbd_imu" ? rgb_topic : left_topic;
+    const auto second_image_topic = sensor_mode_ == "rgbd_imu" ? depth_topic : right_topic;
+    left_sub_.subscribe(this, first_image_topic, rmw_qos_profile_sensor_data);
+    right_sub_.subscribe(this, second_image_topic, rmw_qos_profile_sensor_data);
+    image_pair_sync_ = std::make_shared<message_filters::Synchronizer<ImagePairPolicy>>(
+      ImagePairPolicy(20), left_sub_, right_sub_);
+    image_pair_sync_->setMaxIntervalDuration(
       rclcpp::Duration::from_seconds(max_stereo_skew_sec_));
-    stereo_sync_->registerCallback(
-      std::bind(&OrbSlam3Node::OnStereo, this, std::placeholders::_1,
+    image_pair_sync_->registerCallback(
+      std::bind(&OrbSlam3Node::OnImagePair, this, std::placeholders::_1,
         std::placeholders::_2));
 
     imu_callback_group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
@@ -282,32 +294,47 @@ private:
     return measurements;
   }
 
-  void OnStereo(const Image::ConstSharedPtr & left, const Image::ConstSharedPtr & right)
+  void OnImagePair(const Image::ConstSharedPtr & first, const Image::ConstSharedPtr & second)
   {
     const auto processing_start = std::chrono::steady_clock::now();
-    const rclcpp::Time left_stamp(left->header.stamp);
-    const rclcpp::Time right_stamp(right->header.stamp);
-    const double frame_stamp_sec = left_stamp.seconds();
-    const double stereo_skew_sec = std::abs((left_stamp - right_stamp).seconds());
+    const rclcpp::Time first_stamp(first->header.stamp);
+    const rclcpp::Time second_stamp(second->header.stamp);
+    const double frame_stamp_sec = first_stamp.seconds();
+    const double pair_skew_sec = std::abs((first_stamp - second_stamp).seconds());
 
-    if (!std::isfinite(frame_stamp_sec) || stereo_skew_sec > max_stereo_skew_sec_) {
+    if (!std::isfinite(frame_stamp_sec) || pair_skew_sec > max_stereo_skew_sec_) {
       RCLCPP_WARN_THROTTLE(
-        get_logger(), *get_clock(), 2000, "Rejected unsynchronized stereo pair");
+        get_logger(), *get_clock(), 2000, "Rejected unsynchronized image pair");
       return;
     }
     if (have_frame_stamp_ && frame_stamp_sec <= last_frame_stamp_sec_) {
       RCLCPP_WARN_THROTTLE(
-        get_logger(), *get_clock(), 2000, "Rejected non-monotonic stereo timestamp");
+        get_logger(), *get_clock(), 2000, "Rejected non-monotonic image timestamp");
       return;
     }
 
-    cv::Mat left_image;
-    cv::Mat right_image;
+    cv::Mat first_image;
+    cv::Mat second_image;
     try {
-      left_image = cv_bridge::toCvCopy(
-        left, sensor_msgs::image_encodings::MONO8)->image;
-      right_image = cv_bridge::toCvCopy(
-        right, sensor_msgs::image_encodings::MONO8)->image;
+      if (sensor_mode_ == "rgbd_imu") {
+        first_image = cv_bridge::toCvCopy(
+          first, sensor_msgs::image_encodings::RGB8)->image;
+        // ORB-SLAM3 reads the depth scale from the camera settings. Preserve the
+        // incoming 16-bit or 32-bit depth representation for TrackRGBD.
+        second_image = cv_bridge::toCvCopy(second)->image;
+        if (second_image.type() != CV_16UC1 && second_image.type() != CV_32FC1) {
+          RCLCPP_WARN_THROTTLE(
+            get_logger(), *get_clock(), 2000,
+            "RGB-D depth image must be 16UC1 or 32FC1 (received %s)",
+            second->encoding.c_str());
+          return;
+        }
+      } else {
+        first_image = cv_bridge::toCvCopy(
+          first, sensor_msgs::image_encodings::MONO8)->image;
+        second_image = cv_bridge::toCvCopy(
+          second, sensor_msgs::image_encodings::MONO8)->image;
+      }
     } catch (const cv_bridge::Exception & error) {
       RCLCPP_ERROR(get_logger(), "Image conversion failed: %s", error.what());
       return;
@@ -323,8 +350,13 @@ private:
 
     try {
       std::scoped_lock lock(backend_mutex_);
-      camera_from_world = system_->TrackStereo(
-        left_image, right_image, frame_stamp_sec, imu_measurements);
+      if (sensor_mode_ == "rgbd_imu") {
+        camera_from_world = system_->TrackRGBD(
+          first_image, second_image, frame_stamp_sec, imu_measurements);
+      } else {
+        camera_from_world = system_->TrackStereo(
+          first_image, second_image, frame_stamp_sec, imu_measurements);
+      }
       orb_state = system_->GetTrackingState();
 
 #ifdef VIF_ORB_SLAM3_HAS_DIAGNOSTICS
@@ -369,7 +401,7 @@ private:
       std::chrono::duration<double, std::milli>(processing_end - processing_start).count());
 
     TrackingStatus status;
-    status.header.stamp = left->header.stamp;
+    status.header.stamp = first->header.stamp;
     status.header.frame_id = map_frame_;
     status.state = ToVifTrackingState(orb_state);
     status.tracked_features = tracked_features;
@@ -381,7 +413,7 @@ private:
     status.backend = "orb_slam3_4452a3c";
     tracking_pub_->publish(status);
 
-    PublishPose(camera_from_world, orb_state, left->header.stamp);
+    PublishPose(camera_from_world, orb_state, first->header.stamp);
     const std::size_t dropped_imu_samples = dropped_imu_samples_.load();
     if (dropped_imu_samples > 0U) {
       RCLCPP_WARN_THROTTLE(
@@ -501,7 +533,7 @@ private:
   std::unique_ptr<ORB_SLAM3::System> system_;
   message_filters::Subscriber<Image> left_sub_;
   message_filters::Subscriber<Image> right_sub_;
-  std::shared_ptr<message_filters::Synchronizer<StereoPolicy>> stereo_sync_;
+  std::shared_ptr<message_filters::Synchronizer<ImagePairPolicy>> image_pair_sync_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
   rclcpp::CallbackGroup::SharedPtr imu_callback_group_;
   rclcpp::Publisher<TrackingStatus>::SharedPtr tracking_pub_;
@@ -522,6 +554,7 @@ private:
   double max_stereo_skew_sec_{0.005};
   double imu_wait_timeout_sec_{0.02};
 
+  std::string sensor_mode_{"stereo_imu"};
   std::string map_frame_;
   std::string base_frame_;
   Eigen::Isometry3d orb_world_to_map_{Eigen::Isometry3d::Identity()};
