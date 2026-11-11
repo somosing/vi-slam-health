@@ -41,7 +41,7 @@ Expected simulator interfaces:
 | Camera calibration | `/vif/camera/color/camera_info` |
 | IMU | `/vif/imu` |
 | Wheel encoder odometry | `/diff_drive_controller/odom` |
-| Drive command | `/diff_drive_controller/cmd_vel` |
+| Drive command | `/diff_drive_controller/cmd_vel_unstamped` |
 
 Check the runtime topic names and message encodings on the target Ubuntu 24.04/Pixi environment before starting ORB-SLAM3. In particular, confirm the camera plugin's depth encoding and ensure the ORB-SLAM3 `DepthMapFactor` in the selected camera settings matches the published depth units.
 
