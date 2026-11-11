@@ -1,0 +1,34 @@
+[workspace]
+name = "vi-slam-health"
+version = "0.3.0"
+description = "ROS 2 Jazzy ORB-SLAM3 and Nav2 experiments in an isolated Pixi environment"
+channels = [
+  "https://prefix.dev/robostack-jazzy",
+  "https://prefix.dev/conda-forge",
+]
+platforms = ["linux-64"]
+
+[dependencies]
+ros-jazzy-desktop = "*"
+ros-jazzy-navigation2 = "*"
+ros-jazzy-nav2-bringup = "*"
+ros-jazzy-ros-gz-sim = "*"
+ros-jazzy-ros-gz-bridge = "*"
+ros-jazzy-ros-gz-image = "*"
+colcon-common-extensions = "*"
+cmake = "*"
+ninja = "*"
+cxx-compiler = "*"
+pkg-config = "*"
+eigen = "*"
+opencv = "*"
+pangolin-opengl = "*"
+boost-cpp = "*"
+openssl = "*"
+open3d = "*"
+numpy = "*"
+python = "3.12.*"
+
+[tasks]
+build = "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+clean = "rm -rf build install log"
