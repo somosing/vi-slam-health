@@ -54,7 +54,7 @@ The launch config targets these topics:
 | Camera calibration | `/vif/camera/color/camera_info` |
 | IMU | `/vif/imu` |
 | Wheel encoder odometry | `/diff_drive_controller/odom` |
-| Drive command | `/diff_drive_controller/cmd_vel` |
+| Drive command | `/diff_drive_controller/cmd_vel_unstamped` |
 
 Before connecting ORB-SLAM3, inspect topic availability, image encoding and
 timestamps, camera calibration, optical-frame axes, depth units, and the
