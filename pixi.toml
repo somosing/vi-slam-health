@@ -22,7 +22,7 @@ view-world = "python -m mujoco.viewer --mjcf=simulation/mujoco/worlds/long_indoo
 mujoco-amr = "ros2 launch vif_bringup mujoco_sim.launch.py"
 
 [dev]
-ros-jazzy-mujoco-vendor = { path = "src/third_party/mujoco_vendor/package.xml" }
+ros-jazzy-mujoco-vendor = { path = "src/third_party/mujoco_vendor" }
 ros-jazzy-mujoco-ros2-control-msgs = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control_msgs/package.xml" }
 ros-jazzy-mujoco-ros2-control = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control/package.xml" }
 ros-jazzy-mujoco-ros2-control-plugins = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control_plugins/package.xml" }
