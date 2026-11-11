@@ -118,7 +118,7 @@
             rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002"/>
 
       <site name="imu_site" pos="0 0 0.10" size="0.01" rgba="0.95 0.1 0.1 1"/>
-      <camera name="amr_rgbd_camera" pos="0.19 0 0.28"
+      <camera name="camera" pos="0.19 0 0.28"
               xyaxes="0 1 0 0 0 1" fovy="70" mode="fixed"
               resolution="640 480"/>
     </body>
