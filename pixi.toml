@@ -18,6 +18,7 @@ LD_LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
 build = "colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 build-orbslam3-adapter = "colcon build --symlink-install --packages-up-to vif_orbslam3 --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DVIF_BUILD_ORB_SLAM3_ADAPTER=ON -DVIF_ORB_SLAM3_HAS_DIAGNOSTICS=ON -DORB_SLAM3_ROOT=$ORB_SLAM3_ROOT"
 clean = "rm -rf build install log"
+view-world = "python -m mujoco.viewer --mjcf=simulation/mujoco/worlds/long_indoor_world.xml"
 
 [dev]
 ros-jazzy-mujoco-vendor = { path = "src/third_party/mujoco_vendor/package.xml" }
@@ -38,6 +39,7 @@ pkg-config = "*"
 glfw = ">=3.4,<4"
 libcap = ">=2.76,<3"
 numpy = "*"
+mujoco = "3.12.*"
 opencv = "*"
 eigen = "*"
 pangolin-opengl = "*"
