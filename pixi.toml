@@ -23,6 +23,7 @@ mujoco-amr = "ros2 launch vif_bringup mujoco_sim.launch.py"
 
 [dev]
 ros-jazzy-mujoco-vendor = { path = "src/third_party/mujoco_vendor" }
+ros-jazzy-mujoco-3d-lidar = { path = "src/third_party/mujoco_ros2_control/mujoco_extensions/mujoco_3d_lidar/package.xml" }
 ros-jazzy-mujoco-ros2-control-msgs = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control_msgs/package.xml" }
 ros-jazzy-mujoco-ros2-control = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control/package.xml" }
 ros-jazzy-mujoco-ros2-control-plugins = { path = "src/third_party/mujoco_ros2_control/mujoco_ros2_control_plugins/package.xml" }
