@@ -132,6 +132,7 @@ public:
         100, declare_parameter<std::int64_t>("max_imu_buffer_size", 4000)));
     publish_frozen_pose_on_loss_ =
       declare_parameter<bool>("publish_frozen_pose_on_loss", true);
+    publish_tf_ = declare_parameter<bool>("publish_tf", true);
     tracking_covariance_ = declare_parameter<double>("tracking_covariance", 0.01);
     invalid_covariance_ = declare_parameter<double>("invalid_covariance", 1.0e6);
 
@@ -469,7 +470,7 @@ private:
     }
     odom_pub_->publish(odometry);
 
-    if (tracking) {
+    if (tracking && publish_tf_) {
       geometry_msgs::msg::TransformStamped transform;
       transform.header = odometry.header;
       transform.child_frame_id = base_frame_;
@@ -562,6 +563,7 @@ private:
   Eigen::Isometry3d last_map_from_base_{Eigen::Isometry3d::Identity()};
   bool have_last_pose_{false};
   bool publish_frozen_pose_on_loss_{true};
+  bool publish_tf_{true};
   double tracking_covariance_{0.01};
   double invalid_covariance_{1.0e6};
   // VIF-visible generation; ORB-SLAM3 may reuse its internal map ID after reset.
