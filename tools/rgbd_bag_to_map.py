@@ -83,28 +83,67 @@ def point_arrays(msg, pixel_stride: int, max_range: float):
     return xyz, colors
 
 
-def write_nav_map(points: np.ndarray, output_prefix: Path, resolution: float,
-                  padding: float, floor_z: float, floor_tolerance: float,
+def write_nav_map(points: np.ndarray, ray_origins: np.ndarray, ray_endpoints: np.ndarray,
+                  output_prefix: Path, resolution: float, padding: float,
+                  floor_z: float, floor_tolerance: float,
                   obstacle_min_z: float, obstacle_max_z: float) -> None:
-    x_min = float(points[:, 0].min() - padding)
-    x_max = float(points[:, 0].max() + padding)
-    y_min = float(points[:, 1].min() - padding)
-    y_max = float(points[:, 1].max() + padding)
+    # Include sensor origins so the full observed path remains inside the grid.
+    bounds_points = np.concatenate((points, ray_origins, ray_endpoints), axis=0)
+    x_min = float(bounds_points[:, 0].min() - padding)
+    x_max = float(bounds_points[:, 0].max() + padding)
+    y_min = float(bounds_points[:, 1].min() - padding)
+    y_max = float(bounds_points[:, 1].max() + padding)
     width = max(1, int(np.ceil((x_max - x_min) / resolution)))
     height = max(1, int(np.ceil((y_max - y_min) / resolution)))
     grid = np.full((height, width), 205, dtype=np.uint8)
 
+    # Trace each sampled depth observation from the camera to its measured
+    # endpoint. Cells before the endpoint are observed free space.
+    starts_x = np.floor((ray_origins[:, 0] - x_min) / resolution).astype(np.int64)
+    starts_y = np.floor((ray_origins[:, 1] - y_min) / resolution).astype(np.int64)
+    ends_x = np.floor((ray_endpoints[:, 0] - x_min) / resolution).astype(np.int64)
+    ends_y = np.floor((ray_endpoints[:, 1] - y_min) / resolution).astype(np.int64)
+    inside_ray = (
+        (starts_x >= 0) & (starts_x < width) & (starts_y >= 0) & (starts_y < height)
+        & (ends_x >= 0) & (ends_x < width) & (ends_y >= 0) & (ends_y < height)
+    )
+    starts_x, starts_y = starts_x[inside_ray], starts_y[inside_ray]
+    ends_x, ends_y = ends_x[inside_ray], ends_y[inside_ray]
+    dx, dy = ends_x - starts_x, ends_y - starts_y
+    steps = np.maximum(np.abs(dx), np.abs(dy))
+
+    # Chunk the vectorized Bresenham-style traces to bound temporary memory.
+    chunk_size = 16384
+    for begin in range(0, len(steps), chunk_size):
+        sx = starts_x[begin:begin + chunk_size]
+        sy = starts_y[begin:begin + chunk_size]
+        ddx = dx[begin:begin + chunk_size]
+        ddy = dy[begin:begin + chunk_size]
+        nsteps = steps[begin:begin + chunk_size]
+        max_steps = int(nsteps.max(initial=0))
+        for step in range(max_steps):
+            active = step < nsteps
+            denom = np.maximum(nsteps[active], 1)
+            x = sx[active] + np.rint(ddx[active] * (step / denom)).astype(np.int64)
+            y = sy[active] + np.rint(ddy[active] * (step / denom)).astype(np.int64)
+            grid[height - 1 - y, x] = 254
+
+    # Floor samples provide additional observed-free evidence.
     ix = np.floor((points[:, 0] - x_min) / resolution).astype(np.int64)
     iy = np.floor((points[:, 1] - y_min) / resolution).astype(np.int64)
     inside = (ix >= 0) & (ix < width) & (iy >= 0) & (iy < height)
-    z = points[inside, 2]
-    ix, iy = ix[inside], iy[inside]
-    rows = height - 1 - iy
+    floor = inside & (np.abs(points[:, 2] - floor_z) <= floor_tolerance)
+    grid[height - 1 - iy[floor], ix[floor]] = 254
 
-    floor = np.abs(z - floor_z) <= floor_tolerance
-    obstacle = (z >= obstacle_min_z) & (z <= obstacle_max_z)
-    grid[rows[floor], ix[floor]] = 254
-    grid[rows[obstacle], ix[obstacle]] = 0  # occupied evidence takes precedence
+    # Obstacle returns must override free rays from other pixels or frames.
+    obstacle_cloud = inside & (points[:, 2] >= obstacle_min_z) & (points[:, 2] <= obstacle_max_z)
+    grid[height - 1 - iy[obstacle_cloud], ix[obstacle_cloud]] = 0
+    ray_obstacle = (
+        inside_ray
+        & (ray_endpoints[:, 2] >= obstacle_min_z)
+        & (ray_endpoints[:, 2] <= obstacle_max_z)
+    )
+    grid[height - 1 - ends_y[ray_obstacle], ends_x[ray_obstacle]] = 0
 
     output_prefix.parent.mkdir(parents=True, exist_ok=True)
     image_path = output_prefix.with_suffix(".pgm")
@@ -126,8 +165,11 @@ def write_nav_map(points: np.ndarray, output_prefix: Path, resolution: float,
         ),
         encoding="utf-8",
     )
+    free_cells = int(np.count_nonzero(grid == 254))
+    occupied_cells = int(np.count_nonzero(grid == 0))
+    unknown_cells = int(np.count_nonzero(grid == 205))
     print(f"Wrote {image_path} and {yaml_path} ({width} x {height} cells)")
-
+    print(f"Grid cells: free={free_cells}, occupied={occupied_cells}, unknown={unknown_cells}")
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -138,7 +180,9 @@ def parse_args():
     parser.add_argument("--tf-static-topic", default="/tf_static")
     parser.add_argument("--storage-id", default="mcap")
     parser.add_argument("--pixel-stride", type=int, default=16,
-                        help="Sample one depth pixel per N x N block.")
+                        help="Sample one depth pixel per N x N block for the PCD.")
+    parser.add_argument("--map-pixel-stride", type=int, default=32,
+                        help="Sample one pixel per N x N block for 2D ray tracing.")
     parser.add_argument("--max-range", type=float, default=5.0, help="Metres.")
     parser.add_argument("--voxel-size", type=float, default=0.05, help="PCD voxel size in metres.")
     parser.add_argument("--map-resolution", type=float, default=0.05, help="Nav2 cell size in metres.")
@@ -154,7 +198,7 @@ def main() -> None:
     args = parse_args()
     if not args.bag.is_dir():
         raise SystemExit(f"Bag directory not found: {args.bag}")
-    if args.pixel_stride < 1 or args.max_range <= 0 or args.voxel_size <= 0:
+    if args.pixel_stride < 1 or args.map_pixel_stride < 1 or args.max_range <= 0 or args.voxel_size <= 0:
         raise SystemExit("Stride, range, and voxel size must be positive.")
     if args.map_resolution <= 0 or args.map_padding < 0:
         raise SystemExit("Map resolution must be positive and padding non-negative.")
@@ -179,6 +223,9 @@ def main() -> None:
     cloud_frames = set()
     point_chunks = []
     color_chunks = []
+    ray_origin_chunks = []
+    ray_endpoint_chunks = []
+    odom_positions = []
     cloud_count = 0
     skipped_clouds = 0
 
@@ -202,6 +249,7 @@ def main() -> None:
                 np.array([p.x, p.y, p.z], dtype=np.float64),
                 np.array([q.x, q.y, q.z, q.w], dtype=np.float64),
             )
+            odom_positions.append(odom_pose[0][:2].copy())
             odom_frame = (msg.header.frame_id, msg.child_frame_id)
         elif topic == args.points_topic:
             msg = deserialize_message(serialized, cloud_type)
@@ -227,8 +275,16 @@ def main() -> None:
             p_odom_base, q_odom_base = odom_pose
             r_odom_base = quaternion_matrix(q_odom_base)
             r_base_camera = quaternion_matrix(q_base_camera)
-            xyz_odom = xyz_camera @ (r_odom_base @ r_base_camera).T
-            xyz_odom += p_odom_base + r_odom_base @ t_base_camera
+            camera_origin_odom = p_odom_base + r_odom_base @ t_base_camera
+            r_odom_camera = r_odom_base @ r_base_camera
+            xyz_odom = xyz_camera @ r_odom_camera.T + camera_origin_odom
+            ray_camera, _ = point_arrays(msg, args.map_pixel_stride, args.max_range)
+            if ray_camera.size:
+                ray_odom = ray_camera @ r_odom_camera.T + camera_origin_odom
+                ray_endpoint_chunks.append(ray_odom.astype(np.float32))
+                ray_origin_chunks.append(
+                    np.broadcast_to(camera_origin_odom, ray_odom.shape).astype(np.float32).copy()
+                )
             point_chunks.append(xyz_odom.astype(np.float32))
             if colors is not None:
                 color_chunks.append(colors.astype(np.float32))
@@ -242,6 +298,8 @@ def main() -> None:
             "cloud frame_id, and odometry topic."
         )
     points = np.concatenate(point_chunks, axis=0)
+    ray_origins = np.concatenate(ray_origin_chunks, axis=0)
+    ray_endpoints = np.concatenate(ray_endpoint_chunks, axis=0)
     if color_chunks and len(color_chunks) == len(point_chunks):
         colors = np.concatenate(color_chunks, axis=0)
     else:
@@ -260,11 +318,15 @@ def main() -> None:
     if not o3d.io.write_point_cloud(str(pcd_path), cloud, write_ascii=False, compressed=True):
         raise SystemExit(f"Failed to write {pcd_path}")
     print(f"Fused {cloud_count} clouds; skipped {skipped_clouds}; frames={sorted(cloud_frames)}")
+    if len(odom_positions) > 1:
+        travel = np.linalg.norm(np.diff(np.asarray(odom_positions), axis=0), axis=1).sum()
+        displacement = np.linalg.norm(odom_positions[-1] - odom_positions[0])
+        print(f"Odometry path length={travel:.2f} m; net displacement={displacement:.2f} m")
     print(f"Odometry frames={odom_frame}; fused points={len(points):,}; voxel points={len(cloud.points):,}")
     print(f"Wrote {pcd_path}")
 
     write_nav_map(
-        np.asarray(cloud.points),
+        np.asarray(cloud.points), ray_origins, ray_endpoints,
         args.output_dir / "nav_map",
         args.map_resolution,
         args.map_padding,
