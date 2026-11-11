@@ -1,39 +1,59 @@
 # MuJoCo simulation environment
 
-The first simulation asset is a single-floor, connected indoor environment for
-long-range visual navigation. It is a 60 m × 18 m floorplan: a 60 m central
-corridor, ten side bays, doorways between bays, furniture/columns as visual
-landmarks, and non-repeating wall colors. It is one continuous floor, not a
-multi-storey building.
+The MuJoCo scene is a connected, single-floor 60 m × 18 m indoor map for long-range visual navigation. It contains a central corridor, side bays and doorways, furniture, columns, and varied visual landmarks. The floorplan is long and connected; it is not a multi-storey building.
 
-The scene is in `worlds/long_indoor_world.xml`. The robot is intentionally
-added in the next integration step so the environment geometry can be reviewed
-independently. The planned robot is a differential-drive AMR with RGB-D, IMU,
-wheel encoders, and camera-to-base calibration.
+The scene now includes a differential-drive AMR with independently actuated left and right wheels, wheel position/velocity feedback for encoder odometry, a forward-facing RGB-D camera, and an IMU. Lidar is intentionally omitted.
 
-## Why MuJoCo
+## Pixi workflow
 
-MuJoCo is compatible with ROS 2 Jazzy through the ROS 2 Control
-`mujoco_ros2_control` project. Its Jazzy plugins can publish RGB, depth,
-camera info, and IMU-related data from MJCF models. The upstream project also
-documents a Pixi + RoboStack development workflow. We will build that source
-inside this repository's Pixi workspace rather than add Gazebo packages.
+From the repository root, bootstrap the pinned upstream ROS 2 Control simulator sources, resolve Pixi, and build the workspace:
 
-The camera and sensor plugins use MuJoCo's rendering conventions, so optical
-frame orientation, registered depth, camera info, and image encoding must be
-checked against ORB-SLAM3 before Nav2 is connected.
+```bash
+bash tools/bootstrap_mujoco_workspace.sh
+pixi install
+pixi run build
+```
 
-## Planned sequence
+Open the MuJoCo scene directly:
 
-1. Resolve the Pixi/Jazzy/MuJoCo source workspace and open this environment.
-2. Add the differential-drive robot and wheel encoder interfaces.
-3. Add RGB-D camera and IMU topics and wire them to the RGB-D-inertial
-   ORB-SLAM3 adapter.
-4. Fuse depth observations with tracked poses into an occupancy map. Evaluate
-   OctoMap or a 2D ray-integration mapper; ORB-SLAM3's sparse landmarks are not
-   an occupancy grid.
-5. Convert the 3D map to a Nav2 `OccupancyGrid`, configure Nav2, and add a
-   frontier goal selector for autonomous exploration.
+```bash
+pixi run view-world
+```
 
-The existing PCD converter is an offline static-map utility. It preserves
-unobserved cells as unknown and is not the online mapper for this world.
+Launch the integrated ROS 2 simulator, camera plugin, IMU broadcaster, and differential-drive controller:
+
+```bash
+pixi run mujoco-amr
+```
+
+Use `headless:=true` when launching without a display:
+
+```bash
+pixi run ros2 launch vif_bringup mujoco_sim.launch.py headless:=true
+```
+
+Expected simulator interfaces:
+
+| Interface | Topic |
+| --- | --- |
+| RGB image | `/vif/camera/color/image_raw` |
+| Registered depth image | `/vif/camera/depth/image_raw` |
+| Camera calibration | `/vif/camera/color/camera_info` |
+| IMU | `/vif/imu` |
+| Wheel encoder odometry | `/diff_drive_controller/odom` |
+| Drive command | `/diff_drive_controller/cmd_vel` |
+
+Check the runtime topic names and message encodings on the target Ubuntu 24.04/Pixi environment before starting ORB-SLAM3. In particular, confirm the camera plugin's depth encoding and ensure the ORB-SLAM3 `DepthMapFactor` in the selected camera settings matches the published depth units.
+
+## Integration plan
+
+1. Run and inspect the Pixi MuJoCo environment.
+2. Verify camera, depth, IMU, wheel-state, and odometry streams and their frame transforms.
+3. Run RGB-D-inertial ORB-SLAM3 using simulator images and IMU data; keep EuRoC playback as the dataset baseline.
+4. Integrate depth observations with poses into an online occupancy map. OctoMap or a 2D ray-integration mapper can produce a 2D Nav2 `OccupancyGrid`; ORB-SLAM3 sparse landmarks are not a navigation map.
+5. Configure Nav2 and add frontier-based autonomous exploration over the long map.
+6. Evaluate simulator ground truth offline with ATE/RPE; do not feed simulator truth into SLAM or navigation.
+
+The existing PCD converter is an offline static-map utility. A PCD has no visibility rays, so it cannot identify unseen cells by itself. The online mapper must integrate depth observations using sensor poses and preserve unobserved space as unknown.
+
+MuJoCo's camera conventions differ from ROS optical-frame conventions. The camera-to-base transform and depth conversion must be validated against actual published messages before SLAM results are treated as meaningful.
