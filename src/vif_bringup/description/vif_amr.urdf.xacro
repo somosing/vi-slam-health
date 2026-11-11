@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="vif_amr">
+  <xacro:arg name="headless" default="false"/>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="18.0"/>
+      <inertia ixx="0.30" ixy="0" ixz="0" iyy="0.45" iyz="0" izz="0.40"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.50 0.36 0.14"/></geometry>
+      <material name="amr_blue"><color rgba="0.12 0.34 0.62 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.50 0.36 0.14"/></geometry>
+    </collision>
+  </link>
+
+  <link name="left_wheel_link">
+    <visual><origin xyz="0 0 0" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.12" length="0.07"/></geometry></visual>
+    <collision><origin xyz="0 0 0" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.12" length="0.07"/></geometry></collision>
+  </link>
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="left_wheel_link"/>
+    <origin xyz="0 0.215 -0.12" rpy="0 0 0"/><axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="right_wheel_link">
+    <visual><origin xyz="0 0 0" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.12" length="0.07"/></geometry></visual>
+    <collision><origin xyz="0 0 0" rpy="1.5707963 0 0"/><geometry><cylinder radius="0.12" length="0.07"/></geometry></collision>
+  </link>
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/><child link="right_wheel_link"/>
+    <origin xyz="0 -0.215 -0.12" rpy="0 0 0"/><axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="camera_color_optical_frame"/>
+  <!-- REP-103 optical frame: right, down, forward. -->
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="base_link"/><child link="camera_color_optical_frame"/>
+    <origin xyz="0.19 0 0.28" rpy="-1.5707963 0 -1.5707963"/>
+  </joint>
+
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/><child link="imu_link"/>
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+  </joint>
+
+  <ros2_control name="MujocoAMR" type="system">
+    <hardware>
+      <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+      <param name="mujoco_model">$(find vif_bringup)/simulation/mujoco/worlds/long_indoor_world.xml</param>
+      <param name="headless">$(arg headless)</param>
+      <param name="sim_speed_factor">1.0</param>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"><param name="initial_value">0</param></state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"><param name="initial_value">0</param></state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+    <sensor name="imu">
+      <param name="mujoco_type">imu</param>
+      <param name="mujoco_sensor_name">imu</param>
+      <state_interface name="orientation.x"/>
+      <state_interface name="orientation.y"/>
+      <state_interface name="orientation.z"/>
+      <state_interface name="orientation.w"/>
+      <state_interface name="angular_velocity.x"/>
+      <state_interface name="angular_velocity.y"/>
+      <state_interface name="angular_velocity.z"/>
+      <state_interface name="linear_acceleration.x"/>
+      <state_interface name="linear_acceleration.y"/>
+      <state_interface name="linear_acceleration.z"/>
+    </sensor>
+  </ros2_control>
+</robot>
