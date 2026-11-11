@@ -26,7 +26,6 @@ diff_drive_controller:
     open_loop: false
     cmd_vel_timeout: 0.5
     publish_rate: 50.0
-    use_stamped_vel: false
     linear.x.max_velocity: 0.6
     linear.x.max_acceleration: 0.4
     angular.z.max_velocity: 1.0
