@@ -233,6 +233,8 @@ def main() -> None:
             if colors is not None:
                 color_chunks.append(colors.astype(np.float32))
             cloud_count += 1
+            if cloud_count % 25 == 0:
+                print(f"Processed {cloud_count} clouds; sampled {sum(chunk.shape[0] for chunk in point_chunks):,} points", flush=True)
 
     if not point_chunks:
         raise SystemExit(
