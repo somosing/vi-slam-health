@@ -54,13 +54,18 @@ The launch config targets these topics:
 | Camera calibration | `/vif/camera/color/camera_info` |
 | IMU | `/vif/imu` |
 | Wheel encoder odometry | `/diff_drive_controller/odom` |
-| Drive command | `/diff_drive_controller/cmd_vel_unstamped` |
+| Drive command | `/diff_drive_controller/cmd_vel` (`geometry_msgs/msg/TwistStamped`) |
+
+Jazzy's `diff_drive_controller` expects a stamped `Twist` on
+`~/cmd_vel`. The `use_stamped_vel` switch used by older releases is not
+available in the Jazzy controller.
 
 Before connecting ORB-SLAM3, inspect topic availability, image encoding and
 timestamps, camera calibration, optical-frame axes, depth units, and the
-`odom -> base_link` transform. Confirm that the ORB-SLAM3
-`DepthMapFactor` matches the published depth units. These interfaces are
-configured but still need to be run on the target Ubuntu 24.04 Pixi setup.
+`odom -> base_link` transform. The MuJoCo camera publishes `32FC1` depth
+values in metres, so ORB-SLAM3 RGB-D settings should use
+`DepthMapFactor: 1.0`. These interfaces are configured but still need to be
+run on the target Ubuntu 24.04 Pixi setup.
 
 EuRoC playback remains the dataset baseline. Simulator ground truth is reserved
 for offline ATE/RPE evaluation and must not be fed to SLAM or navigation.
