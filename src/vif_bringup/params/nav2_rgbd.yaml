@@ -157,12 +157,14 @@ global_costmap:
           topic: /vif/camera/depth/points
           max_obstacle_height: 1.8
           min_obstacle_height: 0.12
-          clearing: false
+          clearing: true
           marking: true
           data_type: PointCloud2
           observation_persistence: 0.2
           obstacle_max_range: 4.0
           obstacle_min_range: 0.2
+          raytrace_max_range: 4.0
+          raytrace_min_range: 0.2
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
@@ -191,12 +193,14 @@ local_costmap:
           topic: /vif/camera/depth/points
           max_obstacle_height: 1.8
           min_obstacle_height: 0.12
-          clearing: false
+          clearing: true
           marking: true
           data_type: PointCloud2
           observation_persistence: 0.2
           obstacle_max_range: 4.0
           obstacle_min_range: 0.2
+          raytrace_max_range: 4.0
+          raytrace_min_range: 0.2
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 3.0
