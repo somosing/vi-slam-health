@@ -8,11 +8,19 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
   <exec_depend>vif_euroc_player</exec_depend>
   <exec_depend>vif_fault_injection</exec_depend>
   <exec_depend>vif_health_monitor</exec_depend>
+  <exec_depend>vif_interfaces</exec_depend>
   <exec_depend>vif_mock_slam</exec_depend>
   <exec_depend>vif_orbslam3</exec_depend>
   <exec_depend>vif_relocalization</exec_depend>
