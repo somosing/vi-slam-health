@@ -107,6 +107,7 @@ def write_nav_map(points: np.ndarray, ray_origins: np.ndarray, ray_endpoints: np
         (starts_x >= 0) & (starts_x < width) & (starts_y >= 0) & (starts_y < height)
         & (ends_x >= 0) & (ends_x < width) & (ends_y >= 0) & (ends_y < height)
     )
+    end_z = ray_endpoints[inside_ray, 2]
     starts_x, starts_y = starts_x[inside_ray], starts_y[inside_ray]
     ends_x, ends_y = ends_x[inside_ray], ends_y[inside_ray]
     dx, dy = ends_x - starts_x, ends_y - starts_y
@@ -138,11 +139,7 @@ def write_nav_map(points: np.ndarray, ray_origins: np.ndarray, ray_endpoints: np
     # Obstacle returns must override free rays from other pixels or frames.
     obstacle_cloud = inside & (points[:, 2] >= obstacle_min_z) & (points[:, 2] <= obstacle_max_z)
     grid[height - 1 - iy[obstacle_cloud], ix[obstacle_cloud]] = 0
-    ray_obstacle = (
-        inside_ray
-        & (ray_endpoints[:, 2] >= obstacle_min_z)
-        & (ray_endpoints[:, 2] <= obstacle_max_z)
-    )
+    ray_obstacle = (end_z >= obstacle_min_z) & (end_z <= obstacle_max_z)
     grid[height - 1 - ends_y[ray_obstacle], ends_x[ray_obstacle]] = 0
 
     output_prefix.parent.mkdir(parents=True, exist_ok=True)
