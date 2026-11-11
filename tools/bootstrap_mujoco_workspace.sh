@@ -15,7 +15,12 @@ checkout_pinned() {
   # the upstream manifest rather than a ROS package. Remove our known overlay
   # before checking the pinned Git checkout, then restore it below.
   if [[ "$destination" == "$DEST_ROOT/mujoco_vendor" && -f "$destination/pixi.toml" ]]; then
-    if cmp -s "$VENDOR_PIXI_OVERLAY" "$destination/pixi.toml"; then
+    if cmp -s "$VENDOR_PIXI_OVERLAY" "$destination/pixi.toml" || {
+      grep -Fqx 'name = "mujoco_vendor"' "$destination/pixi.toml" &&
+      grep -Fqx 'version = "0.1.2"' "$destination/pixi.toml" &&
+      grep -Fqx 'distro = "jazzy"' "$destination/pixi.toml" &&
+      grep -Fq 'patchelf = { conda = "patchelf" }' "$destination/pixi.toml"
+    }; then
       rm "$destination/pixi.toml"
     else
       echo "Refusing to replace modified Pixi overlay: $destination/pixi.toml" >&2
