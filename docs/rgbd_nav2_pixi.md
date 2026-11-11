@@ -67,6 +67,12 @@ for offline ATE/RPE evaluation and must not be fed to SLAM or navigation.
 
 ## Stage 3: online 3D mapping and Nav2 map
 
+The default Pixi environment currently covers the simulator and sensor bringup.
+Nav2 and OctoMap packages are deferred until this stage because the available
+RoboStack Nav2 bringup pulls ROS-Gazebo packages and mixed ROS distro-mutex
+builds into the MuJoCo environment, preventing Pixi from solving it. Add and
+resolve those packages when implementing this stage.
+
 The planned online mapper is OctoMap or a 2D ray-integration mapper. It must
 integrate RGB-D observations with sensor poses, preserve unknown space, and
 produce a projected 2D `OccupancyGrid` for Nav2. The 2D projection height band
