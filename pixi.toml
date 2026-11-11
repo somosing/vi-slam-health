@@ -12,6 +12,7 @@ platforms = ["linux-64"]
 ros-jazzy-desktop = "*"
 ros-jazzy-navigation2 = "*"
 ros-jazzy-nav2-bringup = "*"
+ros-jazzy-depth-image-proc = "*"
 ros-jazzy-ros-gz-sim = "*"
 ros-jazzy-ros-gz-bridge = "*"
 ros-jazzy-ros-gz-image = "*"
