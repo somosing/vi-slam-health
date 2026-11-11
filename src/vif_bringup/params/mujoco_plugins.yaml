@@ -1,0 +1,12 @@
+/**:
+  ros__parameters:
+    mujoco_plugins:
+      amr_camera_plugin:
+        type: "mujoco_ros2_control_plugins/CameraPlugin"
+        camera_publish_rate: 15.0
+        camera:
+          policy: streaming
+          frame_name: camera_color_optical_frame
+          info_topic: /vif/camera/color/camera_info
+          image_topic: /vif/camera/color/image_raw
+          depth_topic: /vif/camera/depth/image_raw
