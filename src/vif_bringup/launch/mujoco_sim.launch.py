@@ -37,7 +37,6 @@ def generate_launch_description() -> LaunchDescription:
     mujoco_control = Node(
         package="mujoco_ros2_control",
         executable="ros2_control_node",
-        name="ros2_control_node",
         output="both",
         parameters=[
             {"use_sim_time": True},
