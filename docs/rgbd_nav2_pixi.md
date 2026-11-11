@@ -15,6 +15,29 @@ Lidar is intentionally deferred to a separate project.
   goals in reachable unknown areas so the robot can explore autonomously.
 - Simulator ground truth is reserved for offline ATE/RPE evaluation.
 
+## Pixi environment
+
+On Ubuntu 24.04, install Pixi and resolve the project environment:
+
+```bash
+pixi install
+pixi run build
+```
+
+The regular task builds the default packages. ORB-SLAM3 remains an external,
+version-pinned source tree, matching the repo's existing integration model.
+Build that checkout with the diagnostics patch described in the root README,
+then build the adapter from Pixi:
+
+```bash
+export ORB_SLAM3_ROOT=/absolute/path/to/ORB_SLAM3
+pixi run build-orbslam3-adapter
+```
+
+This keeps ROS commands inside Pixi; do not source the host's
+`/opt/ros/jazzy/setup.bash` for this workflow. The Pixi solve and ORB-SLAM3
+build still need to be confirmed on the target Ubuntu 24.04 machine.
+
 ## Current adapter and launch entry points
 
 The ORB-SLAM3 node accepts either `sensor_mode: stereo_imu` or
