@@ -113,9 +113,9 @@
       </body>
 
       <geom name="front_caster" type="sphere" pos="0.21 0 -0.19" size="0.05"
-            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002"/>
+            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002" condim="1" priority="1"/>
       <geom name="rear_caster" type="sphere" pos="-0.21 0 -0.19" size="0.05"
-            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002"/>
+            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002" condim="1" priority="1"/>
 
       <site name="imu_site" pos="0 0 0.10" size="0.01" rgba="0.95 0.1 0.1 1"/>
       <camera name="camera" pos="0.19 0 0.28"
