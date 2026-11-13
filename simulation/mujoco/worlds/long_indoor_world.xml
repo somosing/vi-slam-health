@@ -1,0 +1,136 @@
+<mujoco model="vi_slam_long_indoor_world">
+  <compiler angle="degree" autolimits="true"/>
+  <option timestep="0.002" integrator="implicitfast" gravity="0 0 -9.81"/>
+  <statistic center="0 0 1.0" extent="40"/>
+
+  <default>
+    <geom condim="3" friction="0.8 0.02 0.002" solref="0.01 1"/>
+  </default>
+
+  <asset>
+    <texture name="floor_checker" type="2d" builtin="checker"
+             rgb1="0.48 0.50 0.52" rgb2="0.32 0.35 0.38"
+             width="512" height="512"/>
+    <material name="floor_material" texture="floor_checker"
+              texrepeat="30 9" texuniform="true" reflectance="0.05"/>
+  </asset>
+
+  <worldbody>
+    <light name="ceiling_light" pos="0 0 8" dir="0 0 -1"
+           directional="true" diffuse="0.78 0.78 0.74" specular="0.08 0.08 0.08"/>
+    <light name="west_fill" pos="-26 0 5" dir="1 0 -0.25"
+           directional="true" diffuse="0.28 0.32 0.38"/>
+    <light name="east_fill" pos="26 0 5" dir="-1 0 -0.25"
+           directional="true" diffuse="0.30 0.28 0.24"/>
+
+    <geom name="floor" type="plane" pos="0 0 0" size="34 11 0.1"
+          material="floor_material" rgba="0.9 0.9 0.9 1"/>
+
+    <!-- Outer perimeter: 60 m long by 18 m wide. -->
+    <geom name="wall_west_end" type="box" pos="-30 0 1.5" size="0.15 9 1.5"
+          rgba="0.72 0.75 0.78 1"/>
+    <geom name="wall_east_end" type="box" pos="30 0 1.5" size="0.15 9 1.5"
+          rgba="0.68 0.72 0.75 1"/>
+    <geom name="wall_north_outer" type="box" pos="0 9 1.5" size="30 0.15 1.5"
+          rgba="0.76 0.77 0.73 1"/>
+    <geom name="wall_south_outer" type="box" pos="0 -9 1.5" size="30 0.15 1.5"
+          rgba="0.70 0.73 0.76 1"/>
+
+    <!-- Long central navigation corridor, with five staggered side-room doors. -->
+    <geom name="hall_north_a" type="box" pos="-27.5 2 1.25" size="2.5 0.12 1.25" rgba="0.78 0.78 0.74 1"/>
+    <geom name="hall_north_b" type="box" pos="-19 2 1.25" size="4 0.12 1.25" rgba="0.76 0.75 0.70 1"/>
+    <geom name="hall_north_c" type="box" pos="-6 2 1.25" size="5 0.12 1.25" rgba="0.70 0.76 0.78 1"/>
+    <geom name="hall_north_d" type="box" pos="6 2 1.25" size="5 0.12 1.25" rgba="0.76 0.71 0.68 1"/>
+    <geom name="hall_north_e" type="box" pos="19 2 1.25" size="4 0.12 1.25" rgba="0.68 0.74 0.70 1"/>
+    <geom name="hall_north_f" type="box" pos="27.5 2 1.25" size="2.5 0.12 1.25" rgba="0.77 0.74 0.68 1"/>
+
+    <geom name="hall_south_a" type="box" pos="-27.5 -2 1.25" size="2.5 0.12 1.25" rgba="0.69 0.73 0.77 1"/>
+    <geom name="hall_south_b" type="box" pos="-19 -2 1.25" size="4 0.12 1.25" rgba="0.77 0.73 0.67 1"/>
+    <geom name="hall_south_c" type="box" pos="-6 -2 1.25" size="5 0.12 1.25" rgba="0.70 0.77 0.74 1"/>
+    <geom name="hall_south_d" type="box" pos="6 -2 1.25" size="5 0.12 1.25" rgba="0.75 0.70 0.74 1"/>
+    <geom name="hall_south_e" type="box" pos="19 -2 1.25" size="4 0.12 1.25" rgba="0.68 0.73 0.78 1"/>
+    <geom name="hall_south_f" type="box" pos="27.5 -2 1.25" size="2.5 0.12 1.25" rgba="0.76 0.76 0.70 1"/>
+
+    <!-- North wing room dividers; each partition has a 1.6 m doorway. -->
+    <geom name="north_div_1a" type="box" pos="-20 3.7 1.25" size="0.12 1.7 1.25" rgba="0.72 0.75 0.79 1"/>
+    <geom name="north_div_1b" type="box" pos="-20 7.3 1.25" size="0.12 1.7 1.25" rgba="0.72 0.75 0.79 1"/>
+    <geom name="north_div_2a" type="box" pos="-10 3.7 1.25" size="0.12 1.7 1.25" rgba="0.79 0.72 0.68 1"/>
+    <geom name="north_div_2b" type="box" pos="-10 7.3 1.25" size="0.12 1.7 1.25" rgba="0.79 0.72 0.68 1"/>
+    <geom name="north_div_3a" type="box" pos="0 3.7 1.25" size="0.12 1.7 1.25" rgba="0.68 0.76 0.73 1"/>
+    <geom name="north_div_3b" type="box" pos="0 7.3 1.25" size="0.12 1.7 1.25" rgba="0.68 0.76 0.73 1"/>
+    <geom name="north_div_4a" type="box" pos="10 3.7 1.25" size="0.12 1.7 1.25" rgba="0.77 0.69 0.73 1"/>
+    <geom name="north_div_4b" type="box" pos="10 7.3 1.25" size="0.12 1.7 1.25" rgba="0.77 0.69 0.73 1"/>
+    <geom name="north_div_5a" type="box" pos="20 3.7 1.25" size="0.12 1.7 1.25" rgba="0.69 0.73 0.79 1"/>
+    <geom name="north_div_5b" type="box" pos="20 7.3 1.25" size="0.12 1.7 1.25" rgba="0.69 0.73 0.79 1"/>
+
+    <!-- South wing room dividers, offset to avoid a mirror-symmetric view. -->
+    <geom name="south_div_1a" type="box" pos="-15 -3.7 1.25" size="0.12 1.7 1.25" rgba="0.74 0.69 0.66 1"/>
+    <geom name="south_div_1b" type="box" pos="-15 -7.3 1.25" size="0.12 1.7 1.25" rgba="0.74 0.69 0.66 1"/>
+    <geom name="south_div_2a" type="box" pos="-5 -3.7 1.25" size="0.12 1.7 1.25" rgba="0.67 0.75 0.78 1"/>
+    <geom name="south_div_2b" type="box" pos="-5 -7.3 1.25" size="0.12 1.7 1.25" rgba="0.67 0.75 0.78 1"/>
+    <geom name="south_div_3a" type="box" pos="5 -3.7 1.25" size="0.12 1.7 1.25" rgba="0.77 0.74 0.68 1"/>
+    <geom name="south_div_3b" type="box" pos="5 -7.3 1.25" size="0.12 1.7 1.25" rgba="0.77 0.74 0.68 1"/>
+    <geom name="south_div_4a" type="box" pos="15 -3.7 1.25" size="0.12 1.7 1.25" rgba="0.68 0.75 0.70 1"/>
+    <geom name="south_div_4b" type="box" pos="15 -7.3 1.25" size="0.12 1.7 1.25" rgba="0.68 0.75 0.70 1"/>
+
+    <!-- Landmark furniture: visually distinct, with clear passages around them. -->
+    <geom name="north_shelf_1" type="box" pos="-25 6.2 0.9" size="2.2 0.35 0.9" rgba="0.35 0.42 0.48 1"/>
+    <geom name="north_column_1" type="cylinder" pos="-12 5.8 1.1" size="0.28 1.1" rgba="0.72 0.55 0.31 1"/>
+    <geom name="north_table_1" type="box" pos="2.5 6.3 0.55" size="1.2 0.7 0.12" rgba="0.40 0.53 0.47 1"/>
+    <geom name="north_shelf_2" type="box" pos="16 6.2 0.9" size="2.0 0.35 0.9" rgba="0.50 0.36 0.39 1"/>
+    <geom name="south_column_1" type="cylinder" pos="-23 -5.6 1.0" size="0.30 1.0" rgba="0.33 0.49 0.57 1"/>
+    <geom name="south_table_1" type="box" pos="-8 -6.2 0.55" size="1.1 0.75 0.12" rgba="0.56 0.43 0.31 1"/>
+    <geom name="south_shelf_1" type="box" pos="8 -6.2 0.85" size="2.0 0.35 0.85" rgba="0.34 0.48 0.39 1"/>
+    <geom name="south_column_2" type="cylinder" pos="23 -5.8 1.15" size="0.28 1.15" rgba="0.55 0.40 0.55 1"/>
+
+    <!-- Corridor landmarks break up long, repetitive visual stretches. -->
+    <geom name="hall_pillar_west" type="box" pos="-18 0 1.1" size="0.18 0.18 1.1" rgba="0.63 0.46 0.31 1"/>
+    <geom name="hall_pillar_midwest" type="box" pos="-4 0 1.1" size="0.18 0.18 1.1" rgba="0.35 0.50 0.61 1"/>
+    <geom name="hall_pillar_mideast" type="box" pos="11 0 1.1" size="0.18 0.18 1.1" rgba="0.54 0.38 0.45 1"/>
+    <geom name="hall_pillar_east" type="box" pos="25 0 1.1" size="0.18 0.18 1.1" rgba="0.39 0.55 0.40 1"/>
+      <!-- Differential-drive AMR: axle is local Y; positive wheel speed drives toward +X. -->
+    <body name="base_link" pos="-27 0 0.24">
+      <freejoint name="base_free_joint"/>
+      <inertial pos="0 0 0" mass="18.0" diaginertia="0.30 0.45 0.40"/>
+      <geom name="amr_chassis" type="box" pos="0 0 0" size="0.25 0.18 0.07"
+            rgba="0.12 0.34 0.62 1" friction="0.8 0.02 0.002"/>
+      <geom name="amr_front_marker" type="box" pos="0.19 0 0.045" size="0.045 0.07 0.025"
+            rgba="0.92 0.32 0.12 1" contype="0" conaffinity="0"/>
+
+      <body name="left_wheel_link" pos="0 0.215 -0.12">
+        <joint name="left_wheel_joint" type="hinge" axis="0 1 0"/>
+        <inertial pos="0 0 0" mass="1.0" diaginertia="0.006 0.006 0.004"/>
+        <geom name="left_wheel" type="cylinder" size="0.12 0.035"
+              quat="0.7071068 0.7071068 0 0" rgba="0.08 0.08 0.09 1"
+              friction="1.5 0.02 0.002"/>
+      </body>
+      <body name="right_wheel_link" pos="0 -0.215 -0.12">
+        <joint name="right_wheel_joint" type="hinge" axis="0 1 0"/>
+        <inertial pos="0 0 0" mass="1.0" diaginertia="0.006 0.006 0.004"/>
+        <geom name="right_wheel" type="cylinder" size="0.12 0.035"
+              quat="0.7071068 0.7071068 0 0" rgba="0.08 0.08 0.09 1"
+              friction="1.5 0.02 0.002"/>
+      </body>
+
+      <geom name="front_caster" type="sphere" pos="0.21 0 -0.19" size="0.05"
+            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002" condim="1" priority="1"/>
+      <geom name="rear_caster" type="sphere" pos="-0.21 0 -0.19" size="0.05"
+            rgba="0.25 0.25 0.27 1" friction="0.8 0.02 0.002" condim="1" priority="1"/>
+
+      <site name="imu_site" pos="0 0 0.10" size="0.01" rgba="0.95 0.1 0.1 1"/>
+      <camera name="camera" pos="0.19 0 0.28"
+              xyaxes="0 -1 0 0 0 1" fovy="70" mode="fixed"
+              resolution="640 480"/>
+    </body>
+  </worldbody>
+  <sensor>
+    <framequat name="imu_quat" objtype="site" objname="imu_site"/>
+    <gyro name="imu_gyro" site="imu_site"/>
+    <accelerometer name="imu_accel" site="imu_site"/>
+  </sensor>
+  <actuator>
+    <velocity name="left_wheel_joint" joint="left_wheel_joint" kv="20" ctrlrange="-12 12"/>
+    <velocity name="right_wheel_joint" joint="right_wheel_joint" kv="20" ctrlrange="-12 12"/>
+  </actuator>
+
+</mujoco>

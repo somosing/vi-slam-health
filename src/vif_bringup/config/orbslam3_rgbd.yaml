@@ -1,0 +1,32 @@
+orbslam3:
+  ros__parameters:
+    sensor_mode: rgbd_imu
+    vocabulary_path: ""
+    settings_path: ""
+    use_viewer: false
+    rgb_topic: /vif/camera/color/image_raw
+    depth_topic: /vif/camera/depth/image_raw
+    imu_topic: /vif/imu
+    map_frame: map
+    base_frame: base_link
+    max_stereo_skew_sec: 0.015
+    imu_wait_timeout_sec: 0.02
+    max_imu_buffer_size: 4000
+    publish_frozen_pose_on_loss: true
+    publish_tf: false
+    tracking_covariance: 0.01
+    invalid_covariance: 1000000.0
+
+    # T_map_orb: ORB optical axes (right, down, forward) to REP-103
+    # map axes (forward, left, up), row-major.
+    orb_world_to_map: [0.0, 0.0, 1.0, 0.0,
+                       -1.0, 0.0, 0.0, 0.0,
+                       0.0, -1.0, 0.0, 0.0,
+                       0.0, 0.0, 0.0, 1.0]
+
+    # Replace with the calibrated transform for the simulated camera mount.
+    # T_camera_base maps base_link coordinates into the RGB optical frame.
+    base_to_camera: [1.0, 0.0, 0.0, 0.0,
+                     0.0, 1.0, 0.0, 0.0,
+                     0.0, 0.0, 1.0, 0.0,
+                     0.0, 0.0, 0.0, 1.0]

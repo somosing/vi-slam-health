@@ -18,3 +18,15 @@ compile_commands.json
 .vscode/
 .idea/
 ORBvoc.txt
+src/third_party/
+
+# RGB-D navigation local artifacts
+**/.pixi/
+*.bak
+
+# Retain the successful navigation map as a reproducible example.
+/maps/*
+!/maps/rgbd_verified_scan_20261113_144153/
+/maps/rgbd_verified_scan_20261113_144153/*
+!/maps/rgbd_verified_scan_20261113_144153/nav_map.yaml
+!/maps/rgbd_verified_scan_20261113_144153/nav_map.pgm

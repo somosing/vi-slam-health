@@ -1,0 +1,12 @@
+[package.build.backend]
+name = "pixi-build-ros"
+channels = ["https://prefix.dev/pixi-build-backends"]
+
+[package.build.config]
+distro = "jazzy"
+extra-package-mappings = [
+  { patchelf = { conda = "patchelf" } },
+  { git = { conda = "git" } },
+  { pkg-config = { conda = "pkg-config" } },
+  { libglfw3-dev = { conda = "glfw" } },
+]
